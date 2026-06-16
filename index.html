@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Правовой альянс — юридический помощник</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --ink:#0F2A43; --ink2:#1A3D5C; --paper:#F3F1EA; --surface:#fff;
+    --line:#E6E1D4; --gold:#B68A33; --goldsoft:#F3E8CC; --text:#14202C;
+    --muted:#5C6A78; --ok:#2E7D5B; --err:#B23B3B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .app{display:flex;flex-direction:column;height:100vh;max-width:560px;margin:0 auto;background:var(--surface)}
+  /* Header */
+  .header{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(135deg,var(--ink),var(--ink2))}
+  .logo{background:#fff;border-radius:10px;padding:6px 9px;display:flex;align-items:center;max-width:100%}
+  .logo img{max-height:54px;max-width:100%;height:auto;width:auto;display:block}
+  .htag{font-size:11px;color:#C7D2DD;text-align:center}
+  /* Contact strip */
+  .strip{display:flex;flex-direction:column;gap:4px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+  .clabel{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:3px 0 2px}
+  .crow{display:flex;gap:6px}
+  .crow a{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 4px;border-radius:8px;border:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:11.5px;font-weight:600;cursor:pointer}
+  .crow a svg{width:13px;height:13px;color:var(--gold)}
+  .site{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px;margin-top:4px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer}
+  .site svg{width:12px;height:12px;color:var(--gold)}
+  /* Chat */
+  .chat{flex:1;overflow-y:auto;padding:18px 16px;background:var(--paper)}
+  .chat::-webkit-scrollbar{width:8px}.chat::-webkit-scrollbar-thumb{background:#d8d3c6;border-radius:8px}
+  .row{display:flex;margin-bottom:10px;animation:fadein .25s ease both}
+  .row.user{justify-content:flex-end}
+  .bubble{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5}
+  .bubble.bot{background:var(--surface);color:var(--text);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bubble.user{background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+  .wide{max-width:94%;width:94%}
+  .typing{display:inline-flex;gap:5px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+  .dot{width:7px;height:7px;border-radius:99px;background:var(--muted);animation:blink 1.2s infinite both}
+  /* Assessment card */
+  .assess{background:var(--surface);border:1px solid var(--line);border-radius:14px;border-top-left-radius:4px;padding:16px}
+  .assess .hd{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .assess .seal{width:26px;height:26px;border-radius:7px;background:var(--goldsoft);display:flex;align-items:center;justify-content:center}
+  .assess .seal svg{width:15px;height:15px;color:var(--gold)}
+  .assess .ti{font-weight:700;font-size:14px;color:var(--ink)}
+  .assess .ai{margin-left:auto;font-size:10px;font-weight:700;color:var(--ink);background:var(--goldsoft);padding:2px 7px;border-radius:5px}
+  .assess p{margin:12px 0 0;font-size:14px;line-height:1.55}
+  .sect{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 7px}
+  .norm{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+  .nchip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:var(--gold);background:var(--goldsoft);border:1px solid #B68A3340;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .nnote{font-size:13px;color:var(--muted);line-height:1.45;flex:1;min-width:160px}
+  .li{display:flex;gap:8px;margin-bottom:5px;font-size:13.5px;line-height:1.45}
+  .li svg{width:15px;height:15px;flex-shrink:0;margin-top:2px}
+  .disc{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);line-height:1.45}
+  /* Lead card */
+  .leadcard{background:var(--ink);border-radius:14px;border-top-left-radius:4px;padding:16px;color:#fff}
+  .leadcard .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .leadcard .ck{width:24px;height:24px;border-radius:99px;background:var(--gold);display:flex;align-items:center;justify-content:center}
+  .leadcard .ck svg{width:15px;height:15px;color:var(--ink)}
+  .leadcard .hd .ti{font-weight:700;font-size:14px}
+  .fld{display:flex;gap:10px;font-size:13px;padding:3px 0}
+  .fld .k{color:#9aa9b8;min-width:96px}.fld .v{font-weight:500}
+  .deliv{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.14)}
+  .srow{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0}
+  .srow .lbl{color:#cdd6e0;min-width:64px}.srow .tgt{color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .st{font-weight:600;white-space:nowrap}
+  .fbk{display:flex;gap:8px;margin-top:8px}
+  .fbk a{flex:1;text-align:center;padding:8px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;text-decoration:none;font-size:12.5px;font-weight:600;cursor:pointer}
+  /* Controls */
+  .controls{border-top:1px solid var(--line);background:var(--surface);padding:12px}
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .cat{display:flex;align-items:center;gap:8px;flex:1 1 calc(50% - 8px);min-width:150px;padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface);cursor:pointer;text-align:left;color:var(--ink);font-size:13px;font-weight:500}
+  .cat:hover{border-color:var(--gold)}
+  .cat svg{width:16px;height:16px;color:var(--gold);flex-shrink:0}
+  .calc-entry{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--gold);background:var(--goldsoft);color:var(--ink);font-weight:600;font-size:13.5px;cursor:pointer;margin-bottom:10px}
+  .calc-entry svg{width:17px;height:17px;color:var(--gold);flex-shrink:0}
+  .form{display:flex;flex-direction:column;gap:9px;margin-bottom:10px}
+  .fl{display:flex;flex-direction:column;gap:4px}
+  .fl label{font-size:12px;font-weight:600;color:var(--muted)}
+  .fl select,.fl input{padding:10px 11px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-family:inherit;color:var(--text);background:#fff;outline:none;width:100%}
+  .fl select:focus,.fl input:focus{border-color:var(--gold)}
+  .calc-actions{display:flex;gap:8px}
+  .quick{display:flex;gap:8px;margin-bottom:10px}
+  .qbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:11px;font-weight:600;font-size:13px;cursor:pointer;border:1px solid}
+  .qbtn svg{width:16px;height:16px;flex-shrink:0}
+  .qbook{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .qbook svg{color:var(--gold)}
+  .qcalc{background:var(--goldsoft);color:var(--ink);border-color:var(--gold)}
+  .qcalc svg{color:var(--gold)}
+  .btns{display:flex;gap:8px}
+  .cta{flex:1;padding:12px;border-radius:11px;border:none;background:var(--ink);color:#fff;font-weight:600;font-size:14px;cursor:pointer}
+  .cta:hover{background:var(--ink2)}
+  .cta2{padding:12px 16px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer}
+  .full{width:100%}
+  .inrow{display:flex;gap:8px;align-items:flex-end}
+  textarea{flex:1;resize:none;max-height:120px;padding:11px 13px;border-radius:11px;border:1px solid var(--line);font-size:14px;font-family:inherit;color:var(--text);outline:none;line-height:1.4}
+  textarea:focus{border-color:var(--gold)}
+  textarea:disabled{background:var(--paper)}
+  .send{width:44px;height:44px;border-radius:11px;border:none;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .send:disabled{background:#C7CCD8;cursor:default}
+  .send svg{width:18px;height:18px}
+  @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.row,.dot{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <!-- ЛОГОТИП вшит как data-URI прямо в атрибут src ниже.
+         Чтобы заменить — подставьте другой data:image/...;base64,… в src. -->
+    <div class="logo">
+      <img id="brand-logo" src="data:image/jpeg;base64,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" alt="Правовой альянс «Осипова и Тропин»" />
+    </div>
+    <div class="htag">Защита бизнеса и частных клиентов</div>
+  </div>
+  <div class="strip" id="strip"></div>
+  <div class="chat" id="chat"></div>
+  <div class="controls" id="controls"></div>
+</div>
+
+<script>
+/* ============ Конфиг витрины (контакты с сайта) ============ */
+const FIRM = {
+  site:"https://alliance-lawyer.ru/",
+  cities:[
+    {city:"Краснодар",   phoneRaw:"79137200792", whatsapp:"https://wa.me/79137200792", telegram:"https://t.me/V_Tropman"},
+  ],
+  leadEmail:"tropman@gmail.com",        // для ручного fallback (mailto)
+  leadWaRaw:"77772351985",              // для ручного fallback (WhatsApp)
+};
+const CATS = [
+  {id:"block", label:"Блокировки 115-ФЗ / 161-ФЗ", ic:"shield",
+   q:"Опишите блокировку: какой банк, когда заблокировали счёт или приостановили операцию, какие документы запросил банк, связано ли это с P2P или переводами?"},
+  {id:"litigation", label:"Судебные и арбитражные споры", ic:"gavel", subs:[
+    {id:"lit_case", label:"Описать спор юристу",
+     q:"Опишите спор: в каком суде рассматривается или будет рассматриваться — общей юрисдикции или арбитражном, на какой стадии, в чём суть и какая ваша роль (истец, ответчик или третье лицо)?"},
+    {id:"lit_docs", label:"Чек-лист: документы для суда", intro:"Базовый набор для подачи иска. Точный список зависит от категории дела.",
+     checklist:["Исковое заявление с копиями по числу участников дела","Документ об уплате госпошлины (или ходатайство о льготе/отсрочке)","Доверенность или документы о полномочиях представителя","Договор, расписка или иные документы, на которых основаны требования","Доказательства: переписка, акты, фото, выписки, заключения экспертиз","Расчёт суммы иска, если требование денежное","Подтверждение досудебного порядка (претензия и ответ), если он обязателен","Копии паспортов и реквизитов сторон, выписки ЕГРЮЛ или ЕГРИП для организаций"]},
+    {id:"lit_dtp", label:"Чек-лист: действия при ДТП", intro:"Что сделать на месте и после, чтобы защитить свои права.",
+     checklist:["Остановиться, включить аварийку, выставить знак; не покидать место ДТП","Проверить, есть ли пострадавшие; при необходимости вызвать скорую (112)","Вызвать ГИБДД или оформить европротокол, если условия позволяют","Сфотографировать место, расположение машин, повреждения, номера, знаки и разметку","Записать данные второго участника: ФИО, авто, полис ОСАГО, контакты","Найти свидетелей и записать их контакты; сохранить запись видеорегистратора","Не признавать вину письменно до консультации; проверить, что записано в документах","Сообщить страховщику в установленный срок и подать заявление о выплате"]},
+    {id:"lit_contract", label:"Чек-лист: проверка договора", intro:"На что смотреть перед подписанием.",
+     checklist:["Стороны и их полномочия: кто подписывает и есть ли доверенность","Предмет договора — конкретно, без размытых формулировок","Цена, порядок и сроки оплаты, что входит в стоимость","Сроки исполнения и порядок приёмки (акты)","Ответственность сторон: неустойка, штрафы, пени и их размеры","Порядок изменения и расторжения, последствия одностороннего отказа","Гарантии, качество и порядок устранения недостатков","Разрешение споров: претензионный порядок, подсудность, применимое право","Реквизиты и контакты сторон; все приложения на месте и подписаны"]},
+  ]},
+  {id:"business", label:"Помощь бизнесу", ic:"briefcase", subs:[
+    {id:"leasing", label:"Лизинговые споры",
+     q:"Опишите лизинговый спор: предмет лизинга, кто лизингодатель, в чём проблема (изъятие предмета, расчёт сальдо встречных обязательств, качество, просрочка) и сумма?"},
+    {id:"bizsupport", label:"Юридическое сопровождение",
+     q:"Расскажите о компании и задачах: сфера деятельности, что нужно сопровождать (договоры, контрагенты, претензии, текущие вопросы) и есть ли штатный юрист?"},
+    {id:"internaldocs", label:"Внутренние документы",
+     q:"Какие внутренние документы бизнеса нужны: положения, регламенты, приказы, политики, должностные инструкции? Опишите компанию и цель."},
+    {id:"laborsafety", label:"Охрана труда и ТБ",
+     q:"Что требуется по охране труда и технике безопасности: инструкции, положения, журналы, оценка рисков? Укажите сферу деятельности и число работников."},
+    {id:"founding", label:"Учредительные документы",
+     q:"Что нужно с учредительными документами: разработка устава или внесение изменений (адрес, директор, виды деятельности, доли, уставный капитал), регистрация в ФНС? Опишите ситуацию."},
+    {id:"biz_civil", label:"Гражданское право",
+     q:"Расскажите суть спора: что произошло, между кем, есть ли договор, какая сумма или какой результат вам нужен?"},
+    {id:"biz_contract", label:"Составление договоров",
+     q:"Какой договор нужен или какой проверить, между какими сторонами и какие условия важно учесть: предмет, сумма, сроки, ответственность?"},
+    {id:"biz_bankr", label:"Банкротство",
+     q:"Расскажите о ситуации с долгами компании: общая сумма задолженности и перед кем, есть ли просрочки, имущество, текущая выручка, идут ли иски?"},
+    {id:"biz_claim", label:"Претензии и иски",
+     q:"Опишите конфликт: к кому претензия или иск, в чём нарушение, сумма требований, пытались ли решить досудебно?"},
+  ]},
+  {id:"individuals", label:"Помощь физлицам", ic:"user", subs:[
+    {id:"labor", label:"Трудовые споры",
+     q:"Опишите трудовой спор: что произошло (увольнение, невыплата зарплаты, оформление, конфликт), вы работник или работодатель и какой результат нужен?"},
+    {id:"auto", label:"Автоюрист",
+     q:"Опишите ситуацию с авто: ДТП, спор со страховой (ОСАГО/КАСКО), лишение прав, претензии по ремонту или покупке? Что произошло и чего хотите добиться?"},
+    {id:"housing", label:"Жилищные споры",
+     q:"Опишите жилищный спор: что произошло (выселение, раздел, соседи, споры с УК/ЖКХ, залив, право собственности), кто стороны и какой результат нужен?"},
+    {id:"ind_family", label:"Семейное право",
+     q:"Опишите ситуацию: развод, раздел имущества, алименты, споры о детях или брачный договор? Что произошло и чего хотите добиться?"},
+    {id:"ind_civil", label:"Гражданское право",
+     q:"Расскажите суть спора: что произошло, между кем, есть ли договор, какая сумма или какой результат вам нужен?"},
+    {id:"ind_contract", label:"Составление договоров",
+     q:"Какой договор нужен или какой проверить, между какими сторонами и какие условия важно учесть: предмет, сумма, сроки, ответственность?"},
+    {id:"ind_bankr", label:"Банкротство",
+     q:"Расскажите о ситуации с долгами: вы физлицо, общая сумма задолженности и перед кем (банки, МФО), есть ли просрочки, имущество или текущие доходы?"},
+    {id:"ind_claim", label:"Претензии и иски",
+     q:"Опишите конфликт: к кому претензия или иск, в чём нарушение, сумма требований, пытались ли решить досудебно?"},
+  ]},
+];
+
+/* ============ Telegram WebApp ============ */
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+let TGUSER = {name:"", username:"", id:""};
+if(tg){
+  try{ tg.ready(); tg.expand(); }catch(e){}
+  try{ tg.setHeaderColor("#0F2A43"); tg.setBackgroundColor("#F3F1EA"); }catch(e){}
+  const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if(u){
+    TGUSER.name = [u.first_name,u.last_name].filter(Boolean).join(" ");
+    TGUSER.username = u.username ? "@"+u.username : "";
+    TGUSER.id = u.id || "";
+  }
+}
+function openExternal(url){
+  if(tg){
+    if(url.includes("t.me")) { tg.openTelegramLink(url); return; }
+    tg.openLink(url); return;
+  }
+  window.open(url,"_blank");
+}
+
+/* ============ Мини-хелпер для DOM ============ */
+function el(tag, attrs, ...kids){
+  const e=document.createElement(tag); attrs=attrs||{};
+  for(const k in attrs){
+    if(k==="style") Object.assign(e.style,attrs[k]);
+    else if(k==="class") e.className=attrs[k];
+    else if(k==="html") e.innerHTML=attrs[k];
+    else if(k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  for(const kid of kids){ if(kid==null) continue; e.append(kid.nodeType?kid:document.createTextNode(kid)); }
+  return e;
+}
+const ICONS = {
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/>',
+  scroll:'<path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  bank:'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  landmark:'<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+  send:'<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  chat:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  spark:'<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  gavel:'<path d="m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/>',
+  briefcase:'<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  arrowleft:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  calc:'<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+  calendar:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+};
+function svg(name, w){
+  const s=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||""}</svg>`;
+  const wrap=el("span",{class:"ic"}); wrap.innerHTML=s;
+  return wrap.firstChild;
+}
+
+/* ============ Состояние ============ */
+const chat = document.getElementById("chat");
+const controls = document.getElementById("controls");
+let step="greeting", curCat=null, curParent=null;
+let pending={category:"",description:"",assessment:null,name:"",contact:""};
+
+function scroll(){ chat.scrollTop=chat.scrollHeight; }
+function botText(t){ const r=el("div",{class:"row"}, el("div",{class:"bubble bot"},t)); chat.append(r); scroll(); return r; }
+function userText(t){ const r=el("div",{class:"row user"}, el("div",{class:"bubble user"},t)); chat.append(r); scroll(); }
+function addTyping(){
+  const dots=el("div",{class:"typing"}); for(let i=0;i<3;i++){const d=el("span",{class:"dot"}); d.style.animationDelay=(i*0.18)+"s"; dots.append(d);}
+  const r=el("div",{class:"row"},dots); chat.append(r); scroll(); return r;
+}
+
+/* ============ Контакты-строка ============ */
+(function buildStrip(){
+  const strip=document.getElementById("strip");
+  const mkBtn=(ic,lbl,href,isTel)=>{
+    const a=el("a",{onclick:(e)=>{e.preventDefault(); if(isTel){location.href=href;} else openExternal(href);}}, svg(ic), el("span",{},lbl));
+    a.href=href; return a;
+  };
+  FIRM.cities.forEach(c=>{
+    if(FIRM.cities.length>1) strip.append(el("div",{class:"clabel"}, c.city));
+    const row=el("div",{class:"crow"});
+    row.append(mkBtn("phone","Звонок","tel:"+c.phoneRaw,true));
+    row.append(mkBtn("chat","WhatsApp",c.whatsapp,false));
+    row.append(mkBtn("send","Telegram",c.telegram,false));
+    strip.append(row);
+  });
+  const site=el("a",{class:"site",onclick:(e)=>{e.preventDefault(); openExternal(FIRM.site);}}, svg("globe"), el("span",{},"Сайт alliance-lawyer.ru"));
+  site.href=FIRM.site; strip.append(site);
+})();
+
+/* ============ Карточка оценки ============ */
+function assessmentCard(d){
+  const card=el("div",{class:"assess"});
+  const hd=el("div",{class:"hd"}, (()=>{const s=el("div",{class:"seal"}); s.append(svg("spark")); return s;})(), el("div",{class:"ti"},"Предварительная оценка"), el("span",{class:"ai"},"AI"));
+  card.append(hd);
+  if(d.summary) card.append(el("p",{},d.summary));
+  if(d.norms && d.norms.length){
+    card.append(el("div",{class:"sect"},"Применимые нормы"));
+    d.norms.forEach(n=>{
+      const row=el("div",{class:"norm"});
+      if(n.ref) row.append(el("span",{class:"nchip"},n.ref));
+      if(n.note) row.append(el("span",{class:"nnote"},n.note));
+      card.append(row);
+    });
+  }
+  if(d.actions && d.actions.length){
+    card.append(el("div",{class:"sect"},"Что можно сделать"));
+    d.actions.forEach(a=>{const li=el("div",{class:"li"}); const ic=svg("chevron"); ic.style.color="var(--gold)"; li.append(ic, el("span",{},a)); card.append(li);});
+  }
+  if(d.documents && d.documents.length){
+    card.append(el("div",{class:"sect"},"Что подготовить"));
+    d.documents.forEach(x=>{const li=el("div",{class:"li"}); const ic=svg("file"); ic.style.color="var(--muted)"; li.append(ic, el("span",{},x)); card.append(li);});
+  }
+  card.append(el("div",{class:"disc"}, (d.note?d.note+" ":"")+"Это предварительная оценка ИИ, а не юридическая консультация. Точный анализ — после изучения документов."));
+  const r=el("div",{class:"row"}, el("div",{class:"wide"},card)); chat.append(r); scroll();
+}
+
+/* ============ Запрос оценки к бэкенду ============ */
+function normalize(p){
+  const arr=v=>Array.isArray(v)?v.filter(Boolean):[];
+  return {
+    summary: typeof p.summary==="string"?p.summary:"",
+    norms: arr(p.norms).map(n=> typeof n==="string"?{ref:"",note:n}:{ref:n.ref||"",note:n.note||""}),
+    actions: arr(p.actions).map(String),
+    documents: arr(p.documents).map(String),
+    note: typeof p.note==="string"?p.note:"",
+  };
+}
+async function getAssessment(category, description){
+  try{
+    const res=await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({category,description})});
+    if(!res.ok) return {ok:false};
+    const data=await res.json();
+    const text=(data.text||"").trim();
+    const clean=text.replace(/```json/gi,"").replace(/```/g,"").trim();
+    try{ return {ok:true,data:normalize(JSON.parse(clean))}; }
+    catch{ return {ok:true,data:{summary:text,norms:[],actions:[],documents:[],note:""}}; }
+  }catch{ return {ok:false}; }
+}
+async function runAssessment(label, description){
+  setControls("assessing");
+  const t=addTyping();
+  const r=await getAssessment(label,description);
+  t.remove();
+  if(!r.ok){
+    botText("Не удалось сформировать предварительную оценку — но это не страшно. Оставьте контакт, и юрист разберёт вашу ситуацию лично.");
+    setControls("postAssess"); return;
+  }
+  pending.category=label; pending.description=description; pending.assessment=r.data;
+  assessmentCard(r.data);
+  botText("Хотите детальный разбор по вашим документам? Оставьте контакт — юрист «Альянса» свяжется с вами.");
+  setControls("postAssess");
+}
+
+/* ============ Доставка заявки ============ */
+function mailtoLink(l){
+  const body=`Имя: ${l.name||"—"}\nКонтакт: ${l.contact}\nНаправление: ${l.category}\nСитуация: ${l.description}`;
+  return `mailto:${FIRM.leadEmail}?subject=${encodeURIComponent("Новая заявка — "+l.category)}&body=${encodeURIComponent(body)}`;
+}
+function waLink(l){
+  const text=`Новая заявка — ${l.category}\nИмя: ${l.name||"—"}\nКонтакт: ${l.contact}\nСитуация: ${l.description}`;
+  return `https://wa.me/${FIRM.leadWaRaw}?text=${encodeURIComponent(text)}`;
+}
+function statusRow(iconName, label, target, state){
+  const map={sending:{c:"var(--muted)",t:"отправка…"},ok:{c:"var(--ok)",t:"доставлено"},error:{c:"var(--err)",t:"не доставлено"},skipped:{c:"var(--muted)",t:"канал не настроен"}};
+  const s=map[state]||map.skipped;
+  const row=el("div",{class:"srow"});
+  const ic=svg(iconName); ic.style.width="14px"; ic.style.height="14px"; ic.style.color="#9aa9b8";
+  row.append(ic, el("span",{class:"lbl"},label), el("span",{class:"tgt"},target), el("span",{class:"st",style:{color:s.c}},s.t));
+  return row;
+}
+function leadCard(lead, statuses){
+  const card=el("div",{class:"leadcard"});
+  const ck=el("div",{class:"ck"}); ck.append(svg("check"));
+  card.append(el("div",{class:"hd"}, ck, el("div",{class:"ti"},"Обращение зарегистрировано")));
+  const f=(k,v)=> el("div",{class:"fld"}, el("span",{class:"k"},k), el("span",{class:"v"},v));
+  card.append(f("Направление",lead.category), f("Имя",lead.name||"—"), f("Контакт",lead.contact));
+  const deliv=el("div",{class:"deliv"});
+  deliv.append(statusRow("file","Почта", "юрист «Альянса»", statuses.email));
+  deliv.append(statusRow("send","Telegram","юрист «Альянса»", statuses.telegram));
+  card.append(deliv);
+  if(statuses.email!=="ok" || statuses.telegram!=="ok"){
+    const fbk=el("div",{class:"fbk"});
+    const a1=el("a",{onclick:(e)=>{e.preventDefault(); openExternal(mailtoLink(lead));}},"Почта"); a1.href=mailtoLink(lead);
+    const a2=el("a",{onclick:(e)=>{e.preventDefault(); openExternal(waLink(lead));}},"WhatsApp"); a2.href=waLink(lead);
+    card.append(el("div",{class:"deliv"}, el("div",{style:{fontSize:"11px",color:"#9aa9b8",marginBottom:"7px"}},"Продублировать вручную:"), fbk));
+    fbk.append(a1,a2);
+  }
+  const r=el("div",{class:"row"}, el("div",{class:"wide"},card)); chat.append(r); scroll();
+}
+async function sendLead(lead){
+  try{
+    const res=await fetch("/api/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)});
+    if(!res.ok) return {email:"error",telegram:"error"};
+    return await res.json();
+  }catch{ return {email:"error",telegram:"error"}; }
+}
+
+/* ============ Поток ============ */
+function chooseCategory(c){
+  if(c.subs){
+    userText(c.label); curParent=c;
+    botText("Выберите направление в разделе «"+c.label+"»:");
+    setControls("subs"); return;
+  }
+  userText(c.label); curCat=c; pending.category=c.label;
+  botText(c.q); setControls("intake");
+}
+function chooseSub(sub){
+  userText(sub.label);
+  const full=(curParent?curParent.label+" — ":"")+sub.label;
+  pending.category=full;
+  if(sub.checklist){
+    checklistCard(sub.label, sub.intro||"", sub.checklist);
+    pending.description="Запрос чек-листа: "+sub.label;
+    botText("Нужна помощь по этому вопросу? Оставьте контакт — юрист подскажет по вашей ситуации.");
+    setControls("postChecklist"); return;
+  }
+  curCat={id:sub.id,label:full};
+  botText(sub.q); setControls("intake");
+}
+function getDraft(){ const ta=controls.querySelector("textarea"); return ta?ta.value.trim():""; }
+function onSend(){
+  const v=getDraft(); if(!v) return;
+  userText(v);
+  if(step==="greeting"||step==="subs"||step==="calcMenu"){ const lbl=(step==="subs"&&curParent)?curParent.label:"Обращение"; curCat={id:"other",label:lbl}; runAssessment(step==="subs"?("Раздел: "+lbl):"Обращение (определи по описанию)",v); }
+  else if(step==="intake"){ runAssessment((curCat&&curCat.label)||"Обращение",v); }
+  else if(step==="bookTime"){ pending.bookTime=v; botText("Коротко опишите вопрос для консультации (или отправьте «—», если расскажете на встрече)."); setControls("bookTopic"); }
+  else if(step==="bookTopic"){ pending.bookTopic=(v==="—"||v==="-")?"расскажет на консультации":v; pending.description="Запись на онлайн-консультацию. Удобное время: "+(pending.bookTime||"—")+". Вопрос: "+pending.bookTopic; botText("Как вас зовут?"); setControls("contactName"); }
+  else if(step==="contactName"){ pending.name=v; botText("Оставьте телефон, Telegram или email для связи."); setControls("contactInfo"); }
+  else if(step==="contactInfo"){ finalize(v); }
+}
+async function finalize(contact){
+  const lead={
+    category: pending.category||(curCat&&curCat.label)||"Обращение",
+    description: pending.description, name: pending.name, contact,
+    assessment: pending.assessment,
+    tgUser: TGUSER.username, tgUserId: TGUSER.id,
+    createdAt: new Date().toISOString(),
+  };
+  botText(`Спасибо, ${pending.name||"ваше обращение принято"}! Передаю его юристу — с вами свяжутся в ближайшее время.`);
+  setControls("done");
+  const placeholderCard = leadCardSending(lead);
+  const st = await sendLead(lead);
+  placeholderCard.remove();
+  leadCard(lead, {email: st.email||"error", telegram: st.telegram||"error"});
+}
+function leadCardSending(lead){
+  const card=el("div",{class:"leadcard"});
+  const ck=el("div",{class:"ck"}); ck.append(svg("check"));
+  card.append(el("div",{class:"hd"}, ck, el("div",{class:"ti"},"Обращение зарегистрировано")));
+  const f=(k,v)=> el("div",{class:"fld"}, el("span",{class:"k"},k), el("span",{class:"v"},v));
+  card.append(f("Направление",lead.category), f("Имя",lead.name||"—"), f("Контакт",lead.contact));
+  const deliv=el("div",{class:"deliv"});
+  deliv.append(statusRow("file","Почта","отправка…","sending"));
+  deliv.append(statusRow("send","Telegram","отправка…","sending"));
+  card.append(deliv);
+  const r=el("div",{class:"row"}, el("div",{class:"wide"},card)); chat.append(r); scroll();
+  return r;
+}
+function reset(){
+  chat.innerHTML=""; step="greeting"; curCat=null; curParent=null;
+  pending={category:"",description:"",assessment:null,name:"",contact:""};
+  greet(); setControls("greeting");
+}
+
+/* ============ Контролы по шагу ============ */
+function inputRow(placeholder, prefill, enabled){
+  const ta=el("textarea",{rows:"1",placeholder:placeholder, onkeydown:(e)=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault(); onSend();} }});
+  if(prefill) ta.value=prefill;
+  if(!enabled) ta.disabled=true;
+  const btn=el("button",{class:"send",onclick:onSend}); btn.append(svg("send"));
+  const update=()=>{ btn.disabled = !enabled || !ta.value.trim(); };
+  ta.addEventListener("input",update); update();
+  setTimeout(()=>{ if(enabled) ta.focus(); },50);
+  return el("div",{class:"inrow"}, ta, btn);
+}
+function fmt(n){ return Math.round(n).toLocaleString("ru-RU")+" ₽"; }
+function gpImushch(x){
+  if(x<=100000) return 4000;
+  if(x<=300000) return 4000 + 0.03*(x-100000);
+  if(x<=500000) return 10000 + 0.025*(x-300000);
+  if(x<=1000000) return 15000 + 0.02*(x-500000);
+  if(x<=3000000) return 25000 + 0.01*(x-1000000);
+  if(x<=8000000) return 45000 + 0.007*(x-3000000);
+  if(x<=24000000) return 80000 + 0.0035*(x-8000000);
+  if(x<=50000000) return 136000 + 0.003*(x-24000000);
+  if(x<=100000000) return 214000 + 0.002*(x-50000000);
+  return Math.min(314000 + 0.0015*(x-100000000), 900000);
+}
+function calcCard(title, mainLabel, mainValue, ref, note, extra){
+  const card=el("div",{class:"assess"});
+  const seal=el("div",{class:"seal"}); seal.append(svg("calc"));
+  card.append(el("div",{class:"hd"}, seal, el("div",{class:"ti"},title), el("span",{class:"ai"},"расчёт")));
+  card.append(el("div",{style:{margin:"12px 0 2px",fontSize:"13px",color:"var(--muted)"}}, mainLabel));
+  card.append(el("div",{style:{fontSize:"24px",fontWeight:"700",color:"var(--ink)",lineHeight:"1.2"}}, mainValue));
+  if(extra){ card.append(el("div",{style:{marginTop:"6px",fontSize:"12.5px",color:"var(--muted)"}}, extra)); }
+  if(ref){ const r=el("div",{style:{marginTop:"10px"}}); r.append(el("span",{class:"nchip"},ref)); card.append(r); }
+  card.append(el("div",{class:"disc"}, note));
+  const row=el("div",{class:"row"}, el("div",{class:"wide"},card)); chat.append(row); scroll();
+}
+function openCalcMenu(){ userText("Калькуляторы"); botText("Бесплатные калькуляторы. Что посчитать?"); setControls("calcMenu"); }
+function openCalc(kind){
+  if(kind==="gosp"){ userText("Госпошлина (общей юрисдикции)"); pending.category="Госпошлина СОЮ (калькулятор)"; pending.description="Вопрос по госпошлине"; botText("Калькулятор госпошлины для судов общей юрисдикции и мировых судей. Заполните поля и нажмите «Рассчитать»."); setControls("calcGosp"); }
+  else if(kind==="arb"){ userText("Госпошлина (арбитраж)"); pending.category="Госпошлина арбитраж (калькулятор)"; pending.description="Вопрос по госпошлине в арбитраж"; botText("Калькулятор госпошлины для арбитражных судов (ст. 333.21 НК РФ). Заполните поля и нажмите «Рассчитать»."); setControls("calcArb"); }
+  else if(kind==="bankr"){ userText("Пройду ли банкротство"); pending.category="Банкротство — проверка"; pending.description="Вопрос по банкротству"; botText("Быстрая проверка, какая процедура банкротства вам подходит. Ответьте на несколько вопросов и нажмите «Проверить»."); setControls("calcBankr"); }
+  else { userText("Алименты"); pending.category="Алименты (калькулятор)"; pending.description="Вопрос по алиментам"; botText("Калькулятор алиментов по долям от дохода (ст. 81 СК РФ). Заполните поля и нажмите «Рассчитать»."); setControls("calcAlim"); }
+}
+function computeGosp(){
+  const type=document.getElementById("gp-type").value;
+  let gp=0, line="", extra="";
+  if(type==="imushch"||type==="prikaz"){
+    const x=parseFloat((document.getElementById("gp-sum").value||"").replace(/\s/g,"").replace(",","."));
+    if(!x||x<=0){ botText("Укажите цену иска числом больше нуля."); return; }
+    const base=gpImushch(x);
+    gp = type==="prikaz" ? Math.round(base*0.5) : Math.round(base);
+    line = (type==="prikaz"?"Судебный приказ":"Имущественный иск")+", цена иска "+fmt(x);
+    extra = (type==="prikaz"?"50% от госпошлины по иску · ":"")+gpSoyFormula(x);
+  } else if(type==="neimushch"){
+    const who=document.getElementById("gp-istec").value;
+    gp = who==="org"?20000:3000;
+    line = "Неимущественный иск, "+(who==="org"?"организация":"физлицо");
+    extra = "Фиксированная ставка";
+  } else { gp=5000; line="Расторжение брака"; extra="Фиксированная ставка"; }
+  pending.description = line+" → госпошлина ≈ "+fmt(gp);
+  calcCard("Госпошлина — расчёт", line, "≈ "+fmt(gp), "ст. 333.19 НК РФ",
+    "Ориентировочно, для судов общей юрисдикции и мировых судей. Сумма округлена до рубля. Возможны льготы (ст. 333.36 НК РФ); по искам о взыскании алиментов истец госпошлину не платит. Для арбитражных судов ставки иные (ст. 333.21 НК РФ).", extra);
+}
+function computeAlim(){
+  const income=parseFloat((document.getElementById("al-income").value||"").replace(/\s/g,"").replace(",","."));
+  if(!income||income<=0){ botText("Укажите доход числом больше нуля."); return; }
+  const k=document.getElementById("al-kids").value;
+  const share = k==="1"?0.25 : k==="2"?(1/3) : 0.5;
+  const pct = k==="1"?"1/4 (25%)" : k==="2"?"1/3 (≈33%)" : "1/2 (50%)";
+  const amount=Math.round(income*share);
+  pending.description = "Алименты: доход "+fmt(income)+", "+(k==="3"?"3 и более детей":(k+" реб."))+" → "+pct+" ≈ "+fmt(amount)+"/мес";
+  calcCard("Алименты — расчёт", "Доля от дохода: "+pct, "≈ "+fmt(amount)+" / мес", "ст. 81 СК РФ",
+    "Ориентировочно. Доля удерживается из дохода после налогов. Суд может изменить размер с учётом обстоятельств (ст. 81 СК РФ) или назначить выплату в твёрдой сумме (ст. 83 СК РФ). Если дети от разных родителей — расчёт иной.");
+}
+function gpArb(x){
+  if(x<=100000) return 10000;
+  if(x<=1000000) return 10000 + 0.05*(x-100000);
+  if(x<=10000000) return 55000 + 0.03*(x-1000000);
+  if(x<=50000000) return 325000 + 0.01*(x-10000000);
+  return Math.min(725000 + 0.005*(x-50000000), 10000000);
+}
+function computeArb(){
+  const type=document.getElementById("ab-type").value;
+  let gp=0, line="", extra="";
+  if(type==="imushch"||type==="prikaz"){
+    const x=parseFloat((document.getElementById("ab-sum").value||"").replace(/\s/g,"").replace(",","."));
+    if(!x||x<=0){ botText("Укажите цену иска числом больше нуля."); return; }
+    const base=gpArb(x);
+    gp = type==="prikaz" ? Math.max(Math.round(base*0.5),8000) : Math.round(base);
+    line = (type==="prikaz"?"Судебный приказ":"Имущественный иск")+" (арбитраж), цена иска "+fmt(x);
+    extra = (type==="prikaz"?"50% от госпошлины по иску, но не менее 8 000 ₽ · ":"")+gpArbFormula(x);
+  } else {
+    const who=document.getElementById("ab-istec").value;
+    gp = who==="org"?50000:15000;
+    line = "Неимущественный иск (арбитраж), "+(who==="org"?"организация":"физлицо/ИП");
+    extra = "Фиксированная ставка";
+  }
+  pending.description = line+" → госпошлина ≈ "+fmt(gp);
+  calcCard("Госпошлина в арбитраж — расчёт", line, "≈ "+fmt(gp), "ст. 333.21 НК РФ",
+    "Ориентировочно, для арбитражных судов. Сумма округлена до рубля. По судебному приказу — не менее 8 000 ₽. При подаче должником заявления о собственном банкротстве госпошлина не взимается.", extra);
+}
+function computeBankr(){
+  const debt=parseFloat((document.getElementById("bk-debt").value||"").replace(/\s/g,"").replace(",","."));
+  if(!debt||debt<=0){ botText("Укажите сумму долга числом больше нуля."); return; }
+  const overdue=document.getElementById("bk-overdue").value==="yes";
+  const ip=document.getElementById("bk-ip").value;
+  const priv=document.getElementById("bk-priv").value==="yes";
+  const mfcRange = debt>=25000 && debt<=1000000;
+  let route, detail, ref;
+  if(mfcRange && (ip==="closed" || priv)){
+    route="Внесудебное (через МФЦ), бесплатно";
+    detail=(priv && ip!=="closed")
+      ? "Вы в льготной категории (пенсионер, пособия на детей или участник СВО) — внесудебное банкротство доступно даже при открытом исполнительном производстве, при соблюдении сроков."
+      : "Долг в пределах 25 000–1 000 000 ₽, исполнительное производство закрыто из-за отсутствия имущества — это основной путь для МФЦ. Процедура бесплатная и длится около 6 месяцев.";
+    ref="ст. 223.2 ФЗ «О банкротстве»";
+  } else if(debt>=500000){
+    route="Судебное (арбитражный суд)";
+    detail="При долге от 500 000 ₽ и просрочке свыше 3 месяцев гражданин обязан подать заявление. Процедура платная (финансовый управляющий и расходы), но списывает почти любые долги."+(overdue?"":" Уточните срок просрочки.");
+    ref="ст. 213.4 ФЗ «О банкротстве»";
+  } else if(debt>1000000){
+    route="Судебное (арбитражный суд)";
+    detail="Долг свыше 1 000 000 ₽ — бесплатный путь через МФЦ недоступен, банкротство проходит через суд.";
+    ref="ст. 213.4 ФЗ «О банкротстве»";
+  } else if(mfcRange){
+    route="Судебное или дождаться закрытия ИП";
+    detail="Сумма подходит для МФЦ, но для бесплатного пути нужно закрытое исполнительное производство «нет имущества» либо льготный статус. Иначе остаётся судебный путь.";
+    ref="ст. 223.2 / 213.4 ФЗ «О банкротстве»";
+  } else {
+    route="Банкротство, скорее всего, не требуется";
+    detail="Долг меньше 25 000 ₽ — для внесудебного банкротства недостаточно, а судебное при такой сумме обычно нецелесообразно. Возможны другие решения: переговоры с кредиторами, реструктуризация.";
+    ref="ст. 223.2 ФЗ «О банкротстве»";
+  }
+  pending.description="Банкротство: долг "+fmt(debt)+", просрочка 3+ мес: "+(overdue?"да":"нет")+", ИП: "+(ip==="closed"?"закрыто":ip==="open"?"открыто":"не знаю")+", льгота: "+(priv?"да":"нет")+" -> "+route;
+  calcCard("Банкротство — предварительная проверка", "Вероятный вариант:", route, ref,
+    detail+" Это ориентир, а не юридическое заключение: итог зависит от состава долгов, имущества и сделок за последние 3 года. Перед подачей стоит проконсультироваться с юристом.");
+}
+function gpSoyFormula(x){
+  if(x<=100000) return "Фиксированно: 4 000 ₽";
+  if(x<=300000) return "4 000 ₽ + 3% от суммы свыше 100 000 ₽";
+  if(x<=500000) return "10 000 ₽ + 2,5% от суммы свыше 300 000 ₽";
+  if(x<=1000000) return "15 000 ₽ + 2% от суммы свыше 500 000 ₽";
+  if(x<=3000000) return "25 000 ₽ + 1% от суммы свыше 1 000 000 ₽";
+  if(x<=8000000) return "45 000 ₽ + 0,7% от суммы свыше 3 000 000 ₽";
+  if(x<=24000000) return "80 000 ₽ + 0,35% от суммы свыше 8 000 000 ₽";
+  if(x<=50000000) return "136 000 ₽ + 0,3% от суммы свыше 24 000 000 ₽";
+  if(x<=100000000) return "214 000 ₽ + 0,2% от суммы свыше 50 000 000 ₽";
+  return "314 000 ₽ + 0,15% свыше 100 000 000 ₽ (не более 900 000 ₽)";
+}
+function gpArbFormula(x){
+  if(x<=100000) return "Фиксированно: 10 000 ₽";
+  if(x<=1000000) return "10 000 ₽ + 5% от суммы свыше 100 000 ₽";
+  if(x<=10000000) return "55 000 ₽ + 3% от суммы свыше 1 000 000 ₽";
+  if(x<=50000000) return "325 000 ₽ + 1% от суммы свыше 10 000 000 ₽";
+  return "725 000 ₽ + 0,5% свыше 50 000 000 ₽ (не более 10 000 000 ₽)";
+}
+function checklistCard(title, intro, items){
+  const card=el("div",{class:"assess"});
+  const seal=el("div",{class:"seal"}); seal.append(svg("check"));
+  card.append(el("div",{class:"hd"}, seal, el("div",{class:"ti"},title), el("span",{class:"ai"},"чек-лист")));
+  if(intro) card.append(el("p",{},intro));
+  items.forEach(it=>{ const li=el("div",{class:"li"}); const ic=svg("check"); ic.style.color="var(--gold)"; li.append(ic, el("span",{},it)); card.append(li); });
+  card.append(el("div",{class:"disc"}, "Это общий ориентир. По вашей ситуации детали уточнит юрист."));
+  const row=el("div",{class:"row"}, el("div",{class:"wide"},card)); chat.append(row); scroll();
+}
+function openBooking(){ userText("Запись на онлайн-консультацию"); pending.category="Запись на онлайн-консультацию"; pending.bookTime=""; pending.bookTopic=""; botText("Запишу вас на онлайн-консультацию. Когда вам удобно? Напишите желаемый день и время."); setControls("bookTime"); }
+function catButton(node, onClick, isSub){
+  const b=el("button",{class:"cat",onclick:onClick});
+  if(isSub){ const ic=svg("chevron"); ic.style.width="14px"; ic.style.height="14px"; ic.style.color="var(--gold)"; b.append(ic); }
+  else { b.append(svg(node.ic||"file")); }
+  b.append(el("span",{style:{flex:"1"}}, node.label));
+  if(node.subs){ const ch=svg("chevron"); ch.style.width="15px"; ch.style.height="15px"; ch.style.color="var(--muted)"; b.append(ch); }
+  return b;
+}
+function setControls(s){
+  step=s; controls.innerHTML="";
+  if(s==="greeting"){
+    const grid=el("div",{class:"cats"});
+    const quick=el("div",{class:"quick"},
+      el("button",{class:"qbtn qbook",onclick:()=>openBooking()}, svg("calendar"), el("span",{},"Онлайн-консультация")),
+      el("button",{class:"qbtn qcalc",onclick:()=>openCalcMenu()}, svg("calc"), el("span",{},"Калькуляторы")));
+    CATS.forEach(c=> grid.append(catButton(c, ()=>chooseCategory(c), false)));
+    controls.append(quick, grid, inputRow("Опишите ситуацию своими словами…","",true));
+  }else if(s==="subs"){
+    const grid=el("div",{class:"cats"});
+    const back=el("button",{class:"cat",style:{flex:"1 1 100%",color:"var(--muted)"},onclick:()=>setControls("greeting")});
+    const bic=svg("arrowleft"); bic.style.width="15px"; bic.style.height="15px"; bic.style.color="var(--muted)"; back.append(bic, el("span",{},"Назад к разделам"));
+    grid.append(back);
+    ((curParent&&curParent.subs)||[]).forEach(sub=> grid.append(catButton(sub, ()=>chooseSub(sub), true)));
+    controls.append(grid, inputRow("Или опишите ситуацию своими словами…","",true));
+  }else if(s==="calcMenu"){
+    const grid=el("div",{class:"cats"});
+    const back=el("button",{class:"cat",style:{flex:"1 1 100%",color:"var(--muted)"},onclick:()=>setControls("greeting")});
+    const bic=svg("arrowleft"); bic.style.width="15px"; bic.style.height="15px"; bic.style.color="var(--muted)"; back.append(bic, el("span",{},"Назад к разделам"));
+    grid.append(back);
+    grid.append(catButton({label:"Госпошлина (общей юрисдикции)",ic:"gavel"}, ()=>openCalc("gosp"), false));
+    grid.append(catButton({label:"Госпошлина (арбитраж)",ic:"landmark"}, ()=>openCalc("arb"), false));
+    grid.append(catButton({label:"Алименты",ic:"user"}, ()=>openCalc("alim"), false));
+    grid.append(catButton({label:"Пройду ли банкротство",ic:"bank"}, ()=>openCalc("bankr"), false));
+    controls.append(grid, inputRow("Или опишите ситуацию своими словами…","",true));
+  }else if(s==="calcGosp"){
+    const form=el("div",{class:"form"});
+    const typeSel=el("select",{id:"gp-type"},
+      el("option",{value:"imushch"},"Имущественный иск (есть цена иска)"),
+      el("option",{value:"prikaz"},"Судебный приказ"),
+      el("option",{value:"neimushch"},"Неимущественный иск"),
+      el("option",{value:"brak"},"Расторжение брака"));
+    const sumWrap=el("div",{class:"fl",id:"gp-sum-wrap"}, el("label",{},"Цена иска, ₽"), el("input",{type:"number",id:"gp-sum",inputmode:"numeric",placeholder:"Например, 350000"}));
+    const istecSel=el("select",{id:"gp-istec"}, el("option",{value:"fiz"},"Физическое лицо"), el("option",{value:"org"},"Организация"));
+    const istecWrap=el("div",{class:"fl",id:"gp-istec-wrap",style:{display:"none"}}, el("label",{},"Кто подаёт"), istecSel);
+    form.append(el("div",{class:"fl"}, el("label",{},"Тип обращения"), typeSel), sumWrap, istecWrap);
+    const sync=()=>{ const v=typeSel.value; sumWrap.style.display=(v==="imushch"||v==="prikaz")?"flex":"none"; istecWrap.style.display=(v==="neimushch")?"flex":"none"; };
+    typeSel.addEventListener("change",sync); sync();
+    const go=el("button",{class:"cta full",onclick:()=>computeGosp()},"Рассчитать");
+    const sec=el("div",{class:"calc-actions"},
+      el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+      el("button",{class:"cta2",onclick:()=>setControls("calcMenu")},"Назад"));
+    controls.append(form, go, el("div",{style:{height:"8px"}}), sec);
+  }else if(s==="calcAlim"){
+    const form=el("div",{class:"form"});
+    form.append(el("div",{class:"fl"}, el("label",{},"Ежемесячный доход плательщика (после налогов), ₽"), el("input",{type:"number",id:"al-income",inputmode:"numeric",placeholder:"Например, 80000"})));
+    const kids=el("select",{id:"al-kids"}, el("option",{value:"1"},"1 ребёнок"), el("option",{value:"2"},"2 детей"), el("option",{value:"3"},"3 и более"));
+    form.append(el("div",{class:"fl"}, el("label",{},"Количество детей"), kids));
+    const go=el("button",{class:"cta full",onclick:()=>computeAlim()},"Рассчитать");
+    const sec=el("div",{class:"calc-actions"},
+      el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+      el("button",{class:"cta2",onclick:()=>setControls("calcMenu")},"Назад"));
+    controls.append(form, go, el("div",{style:{height:"8px"}}), sec);
+  }else if(s==="calcArb"){
+    const form=el("div",{class:"form"});
+    const typeSel=el("select",{id:"ab-type"},
+      el("option",{value:"imushch"},"Имущественный иск (есть цена иска)"),
+      el("option",{value:"prikaz"},"Судебный приказ"),
+      el("option",{value:"neimushch"},"Неимущественный иск"));
+    const sumWrap=el("div",{class:"fl",id:"ab-sum-wrap"}, el("label",{},"Цена иска, ₽"), el("input",{type:"number",id:"ab-sum",inputmode:"numeric",placeholder:"Например, 1500000"}));
+    const istecSel=el("select",{id:"ab-istec"}, el("option",{value:"org"},"Организация"), el("option",{value:"fiz"},"Физлицо / ИП"));
+    const istecWrap=el("div",{class:"fl",id:"ab-istec-wrap",style:{display:"none"}}, el("label",{},"Кто подаёт"), istecSel);
+    form.append(el("div",{class:"fl"}, el("label",{},"Тип обращения"), typeSel), sumWrap, istecWrap);
+    const sync=()=>{ const v=typeSel.value; sumWrap.style.display=(v==="imushch"||v==="prikaz")?"flex":"none"; istecWrap.style.display=(v==="neimushch")?"flex":"none"; };
+    typeSel.addEventListener("change",sync); sync();
+    const go=el("button",{class:"cta full",onclick:()=>computeArb()},"Рассчитать");
+    const sec=el("div",{class:"calc-actions"},
+      el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+      el("button",{class:"cta2",onclick:()=>setControls("calcMenu")},"Назад"));
+    controls.append(form, go, el("div",{style:{height:"8px"}}), sec);
+  }else if(s==="calcBankr"){
+    const form=el("div",{class:"form"});
+    form.append(el("div",{class:"fl"}, el("label",{},"Общая сумма долгов, ₽"), el("input",{type:"number",id:"bk-debt",inputmode:"numeric",placeholder:"Например, 600000"})));
+    const ov=el("select",{id:"bk-overdue"}, el("option",{value:"yes"},"Да, больше 3 месяцев"), el("option",{value:"no"},"Нет или меньше"));
+    form.append(el("div",{class:"fl"}, el("label",{},"Просрочка по платежам"), ov));
+    const ipsel=el("select",{id:"bk-ip"}, el("option",{value:"closed"},"Закрыто приставами «нет имущества»"), el("option",{value:"open"},"Открыто / идёт"), el("option",{value:"unknown"},"Не знаю"));
+    form.append(el("div",{class:"fl"}, el("label",{},"Исполнительное производство у приставов"), ipsel));
+    const pr=el("select",{id:"bk-priv"}, el("option",{value:"no"},"Нет"), el("option",{value:"yes"},"Пенсионер / пособия на детей / СВО"));
+    form.append(el("div",{class:"fl"}, el("label",{},"Особый статус"), pr));
+    const go=el("button",{class:"cta full",onclick:()=>computeBankr()},"Проверить");
+    const sec=el("div",{class:"calc-actions"},
+      el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+      el("button",{class:"cta2",onclick:()=>setControls("calcMenu")},"Назад"));
+    controls.append(form, go, el("div",{style:{height:"8px"}}), sec);
+  }else if(s==="intake"){
+    controls.append(inputRow("Опишите детали…","",true));
+  }else if(s==="assessing"){
+    controls.append(inputRow("Подождите…","",false));
+  }else if(s==="postAssess"){
+    const wrap=el("div",{class:"btns"});
+    wrap.append(el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+                el("button",{class:"cta2",onclick:()=>{ botText("Опишите вопрос или уточните детали — обновлю оценку."); setControls("intake"); }},"Ещё вопрос"));
+    controls.append(wrap);
+  }else if(s==="postChecklist"){
+    const wrap=el("div",{class:"btns"});
+    wrap.append(el("button",{class:"cta",onclick:()=>{ botText("Как вас зовут?"); setControls("contactName"); }},"Оставить контакт"),
+                el("button",{class:"cta2",onclick:()=>setControls("subs")},"К разделу"));
+    controls.append(wrap);
+  }else if(s==="bookTime"){
+    controls.append(inputRow("Желаемые день и время (например: завтра после 18:00)","",true));
+  }else if(s==="bookTopic"){
+    controls.append(inputRow("Тема вопроса (или «—»)","",true));
+  }else if(s==="contactName"){
+    controls.append(inputRow("Ваше имя", TGUSER.name, true));
+  }else if(s==="contactInfo"){
+    controls.append(inputRow("Телефон, Telegram или email", TGUSER.username, true));
+  }else if(s==="done"){
+    controls.append(el("button",{class:"cta2 full",onclick:reset},"Новый диалог"));
+  }
+}
+
+/* ============ Старт ============ */
+function greet(){
+  botText("Здравствуйте! Это юридический помощник «Правового альянса Осиповой и Тропина». Опишите ситуацию или выберите направление — дам предварительную оценку и передам обращение юристу.");
+}
+greet();
+setControls("greeting");
+</script>
+</body>
+</html>
