@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6", // при желании: claude-haiku-4-5 (дешевле) или claude-opus-4-8 (умнее)
+        model: "claude-haiku-4-5", // при желании: claude-haiku-4-5 (дешевле) или claude-opus-4-8 (умнее)
         max_tokens: 1500,
         system: system,
         messages: [{ role: "user", content: userMsg }],
